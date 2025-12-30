@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Greeting - Kalyan Dev</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Great+Vibes&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #050510;
+            overflow: hidden;
+            perspective: 2000px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            touch-action: none;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, #1a1a40 0%, #050510 100%);
+            z-index: -2;
+        }
+
+        /* Responsive Card Wrapper */
+        .card-wrapper {
+            position: relative;
+            width: 90vw;
+            max-width: 340px;
+            height: 70vh;
+            max-height: 480px;
+            transform-style: preserve-3d;
+            z-index: 10;
+        }
+
+        .card-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backface-visibility: hidden;
+        }
+
+        /* Inside Face */
+        .card-inside {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(25px);
+            z-index: 1;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        /* Front Face */
+        .card-front {
+            background: linear-gradient(135deg, #1e1e3c, #0a0a14);
+            z-index: 5;
+            transform-origin: left;
+            padding: 1.5rem;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            transition: z-index 0.5s;
+        }
+
+        .shimmer {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            background-size: 200% 100%;
+            animation: moveShimmer 3s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes moveShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .signature {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        canvas#bg-particles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+
+        /* Button Fixes */
+        .btn-action {
+            position: relative;
+            z-index: 50;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-gradient"></div>
+    <canvas id="bg-particles"></canvas>
+
+    <div class="card-wrapper" id="cardWrapper">
+        
+        <div class="card-face card-inside" id="insideFace">
+            <div class="w-16 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mb-6 rounded-full"></div>
+            <p class="text-base md:text-lg text-slate-200 italic leading-relaxed mb-6">
+                "May 2026 bring you endless happiness, new adventures, and great achievements. Wishing you a year as bright as your dreams!"
+            </p>
+            <p class="text-slate-400 text-[10px] uppercase tracking-widest mb-1">Warmly Wishing,</p>
+            <h2 class="signature text-4xl md:text-5xl text-gradient">Kalyan Dev</h2>
+            
+            <button onclick="closeCard()" class="btn-action mt-8 md:mt-12 text-slate-400 text-xs hover:text-white border border-slate-700 px-6 py-2 rounded-full active:scale-90">
+                CLOSE GREETING
+            </button>
+        </div>
+
+        <div class="card-face card-front" id="cardFront">
+            <div class="shimmer"></div>
+            
+            <p class="text-blue-400 tracking-[0.4em] text-[9px] md:text-[10px] mb-4 uppercase">New Year 2026</p>
+            <h1 class="text-white text-2xl md:text-3xl font-light mb-2">Welcome to</h1>
+            <div class="text-6xl md:text-7xl font-black text-gradient mb-6 drop-shadow-2xl text-center">2026</div>
+            
+            <div class="flex gap-3 md:gap-4 text-white mb-8 bg-white/5 p-3 md:p-4 rounded-xl border border-white/10">
+                <div class="text-center"><span id="d" class="block text-lg md:text-xl font-bold">00</span><span class="text-[8px] opacity-40">DAYS</span></div>
+                <div class="text-center"><span id="h" class="block text-lg md:text-xl font-bold">00</span><span class="text-[8px] opacity-40">HRS</span></div>
+                <div class="text-center"><span id="m" class="block text-lg md:text-xl font-bold">00</span><span class="text-[8px] opacity-40">MIN</span></div>
+            </div>
+
+            <button onclick="openCard()" id="btnOpen" class="btn-action bg-white text-black px-8 py-3 rounded-full font-bold shadow-lg active:scale-95">
+                OPEN CARD
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Timer ---
+        const target = new Date("Jan 1, 2026 00:00:00").getTime();
+        function updateTimer() {
+            const now = new Date().getTime();
+            const diff = target - now;
+            if(diff > 0) {
+                document.getElementById('d').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+                document.getElementById('h').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                document.getElementById('m').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            }
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // --- Optimized Card Controls ---
+        function openCard() {
+            // GSAP door open
+            gsap.to("#cardFront", {
+                rotateY: -135,
+                duration: 1.5,
+                ease: "power3.inOut"
+            });
+
+            // Prevent front clicks and bring inside button to foreground
+            setTimeout(() => {
+                document.getElementById('cardFront').style.pointerEvents = "none";
+                document.getElementById('btnOpen').style.visibility = "hidden";
+            }, 300);
+
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function closeCard() {
+            // Re-enable front and hide inside interaction
+            document.getElementById('cardFront').style.pointerEvents = "auto";
+            document.getElementById('btnOpen').style.visibility = "visible";
+
+            gsap.to("#cardFront", {
+                rotateY: 0,
+                duration: 1.2,
+                ease: "power3.inOut",
+                onComplete: () => {
+                    // Reset Z-Index safety
+                    gsap.set("#cardFront", { clearProps: "all" });
+                }
+            });
+        }
+
+        // --- Particles Background ---
+        const canvas = document.getElementById('bg-particles');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Dot {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speed = Math.random() * 0.4 + 0.1;
+            }
+            draw() {
+                ctx.fillStyle = "rgba(255,255,255,0.2)";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                ctx.fill();
+            }
+            move() {
+                this.y -= this.speed;
+                if(this.y < 0) this.y = canvas.height;
+            }
+        }
+        for(let i=0; i<60; i++) dots.push(new Dot());
+        function animate() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            dots.forEach(d => { d.move(); d.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Mouse Tilt (Smooth)
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 45;
+            const y = (window.innerHeight / 2 - e.pageY) / 45;
+            gsap.to("#cardWrapper", { rotateY: x, rotateX: -y, duration: 1.2 });
+        });
+    </script>
+</body>
+</html>
