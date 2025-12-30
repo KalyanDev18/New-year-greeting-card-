@@ -3,7 +3,7 @@
 A creative and interactive New Year 2026 greeting card made using HTML, CSS, and JavaScript.
 
 ## 🚀 Live Demo
-👉 [Click here to view Demo](meek-chebakia-02a59f.netlify.app)
+👉 [Click here to view Demo](https://meek-chebakia-02a59f.netlify.app/)
 
 ## 📸 Screenshot
 ![New Year 2026 Greeting Card](screenshot.png)
