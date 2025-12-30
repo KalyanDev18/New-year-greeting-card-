@@ -24,4 +24,4 @@ A creative and interactive New Year 2026 greeting card made using HTML, CSS, and
 2. Open `index.html` in your browser
 
 ## 👤 Author
-Kalyan
+Kalyan DEV
